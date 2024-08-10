@@ -85,11 +85,6 @@ module.exports.loop = function () {
             { memory: { role: 'rangedAttacker', home: homeRoom, targetRoom: targetRoom } });
     }
 
-    // Manage construction of extensions
-    if (Game.spawns['Spawn1'].room.controller.level >= 2) {
-        buildExtensionsInCircle(Game.spawns['Spawn1']);
-    }
-
     // Remove walls blocking sources
     removeWallsBlockingSources(Game.spawns['Spawn1'].room);
 
