@@ -139,31 +139,6 @@ module.exports.loop = function () {
     }
 };
 
-// Function to build extensions in a circle around the spawn
-function buildExtensionsInCircle(spawn) {
-    const extensions = spawn.room.find(FIND_STRUCTURES, {
-        filter: (structure) => structure.structureType == STRUCTURE_EXTENSION
-    });
-
-    if (extensions.length < CONTROLLER_STRUCTURES[STRUCTURE_EXTENSION][spawn.room.controller.level]) {
-        const buildTargets = spawn.room.find(FIND_CONSTRUCTION_SITES, {
-            filter: (site) => site.structureType == STRUCTURE_EXTENSION
-        });
-
-        if (buildTargets.length === 0) {
-            const radius = Math.floor(extensions.length / 8) + 1;
-            const angle = (extensions.length % 8) * (Math.PI / 4); // 45 degrees per extension
-            const x = spawn.pos.x + Math.round(radius * Math.cos(angle));
-            const y = spawn.pos.y + Math.round(radius * Math.sin(angle));
-            
-            // Ensure not placing directly adjacent to the spawn
-            if (!((x === spawn.pos.x && Math.abs(y - spawn.pos.y) === 1) || (y === spawn.pos.y && Math.abs(x - spawn.pos.x) === 1))) {
-                spawn.room.createConstructionSite(x, y, STRUCTURE_EXTENSION);
-            }
-        }
-    }
-}
-
 // Function to remove walls blocking sources
 function removeWallsBlockingSources(room) {
     const sources = room.find(FIND_SOURCES);
