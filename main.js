@@ -1,5 +1,6 @@
 var roleExplorer = require('role.explorer');
 var roleRemoteHarvester = require('role.remoteHarvester');
+var roleRemoteHarvesterW37N45 = require('role.remoteHarvester.W37N45');
 var roleHarvester = require('role.harvester');
 var roleUpgrader = require('role.upgrader');
 var roleBuilder = require('role.builder');
@@ -11,6 +12,7 @@ var helper = require('helper');
 
 const bodyHarvester = [WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE];
 const bodyRemoteHarvester = [WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE];
+const bodyRemoteHarvesterW37N45 = [WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE];
 const bodyUpgrader = [WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE];
 const bodyBuilder = [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE];
 const bodyDefender = [TOUGH, TOUGH, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK, MOVE, MOVE, MOVE];
@@ -34,6 +36,7 @@ module.exports.loop = function () {
     var explorers = _.filter(Game.creeps, (creep) => creep.memory.role == 'explorer');
     var harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester');
     var remoteHarvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'remoteHarvester');
+    var remoteHarvestersW37N45 = _.filter(Game.creeps, (creep) => creep.memory.role == 'remoteHarvesterW37N45');
     var upgraders = _.filter(Game.creeps, (creep) => creep.memory.role == 'upgrader');
     var builders = _.filter(Game.creeps, (creep) => creep.memory.role == 'builder');
     var defenders = _.filter(Game.creeps, (creep) => creep.memory.role == 'defender');
@@ -44,6 +47,7 @@ module.exports.loop = function () {
     const maxExplorers = 0;
     const maxHarvesters = 3;
     const maxRemoteHarvesters = 4;
+    const maxRemoteHarvestersW37N45 = 6;
     const maxUpgraders = 4;
     const maxBuilders = 2;
     const maxDefenders = 2;
@@ -59,6 +63,10 @@ module.exports.loop = function () {
         var newName = 'RemoteHarvester' + Game.time;
         Game.spawns['Spawn1'].spawnCreep(bodyRemoteHarvester, newName,
             { memory: { role: 'remoteHarvester', home: 'W38N44', target: 'W37N44' } });
+    } else if (remoteHarvestersW37N45.length < maxRemoteHarvestersW37N45) {
+        var newName = 'RemoteHarvesterW37N45' + Game.time;
+        Game.spawns['Spawn1'].spawnCreep(bodyRemoteHarvesterW37N45, newName,
+            { memory: { role: 'remoteHarvesterW37N45', home: 'W38N44', target: 'W37N45' } });
     } else if (upgraders.length < maxUpgraders) {
         var newName = 'Upgrader' + Game.time;
         Game.spawns['Spawn1'].spawnCreep(bodyUpgrader, newName,
@@ -99,6 +107,9 @@ module.exports.loop = function () {
         }
         if (creep.memory.role == 'remoteHarvester') {
             roleRemoteHarvester.run(creep);
+        }
+        if (creep.memory.role == 'remoteHarvesterW37N45') {
+            roleRemoteHarvesterW37N45.run(creep);
         }
         if (creep.memory.role == 'upgrader') {
             roleUpgrader.run(creep);

@@ -4,19 +4,21 @@ var roleRepairer = {
 
     /** @param {Creep} creep **/
     run: function(creep) {
+        // Recycle if the creep is near the end of its life
         if (creep.ticksToLive < 50) {
             var spawn = Game.spawns['Spawn1'];
             if (creep.pos.isNearTo(spawn)) {
                 creep.say('♻️ recycle');
                 spawn.recycleCreep(creep);
-                return; // Skip further actions
+                return;
             } else {
                 creep.say('🚶 to recycle');
                 creep.moveTo(spawn, { visualizePathStyle: { stroke: '#ff0000' } });
-                return; // Skip further actions
+                return;
             }
         }
 
+        // Switch between harvesting and repairing states
         if (creep.memory.repairing && creep.store[RESOURCE_ENERGY] == 0) {
             creep.memory.repairing = false;
             creep.say('🔄 harvest');
@@ -27,32 +29,50 @@ var roleRepairer = {
         }
 
         if (creep.memory.repairing) {
-            var targets = creep.room.find(FIND_STRUCTURES, {
-                filter: object => object.hits < object.hitsMax
-            });
+            let target;
 
-            targets.sort((a, b) => a.hits - b.hits);
+            // Check if the creep already has a target structure
+            if (creep.memory.repairTargetId) {
+                target = Game.getObjectById(creep.memory.repairTargetId);
+            }
 
-            // Prioritize ramparts and walls below a certain threshold
-            var criticalTarget = targets.find(target => 
-                (target.structureType == STRUCTURE_RAMPART && target.hits < 10000) || 
-                (target.structureType == STRUCTURE_WALL && target.hits < 10000)
-            );
+            if (!target || target.hits >= target.hitsMax) {
+                // Prioritize critical structures that are close to decaying
+                var targets = creep.room.find(FIND_STRUCTURES, {
+                    filter: object => object.hits < object.hitsMax
+                });
 
-            if (criticalTarget) {
-                if (creep.repair(criticalTarget) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(criticalTarget, { visualizePathStyle: { stroke: '#ffffff' } });
+                targets.sort((a, b) => a.hits - b.hits);
+
+                target = targets.find(target => 
+                    (target.structureType == STRUCTURE_RAMPART && target.hits < 5000) || 
+                    (target.structureType == STRUCTURE_WALL && target.hits < 5000) ||
+                    (target.structureType == STRUCTURE_ROAD && target.hits < target.hitsMax * 0.5)
+                );
+
+                if (!target && targets.length > 0) {
+                    target = targets[0];
                 }
-            } else if (targets.length > 0) {
-                var repairTarget = targets[0];
-                if (creep.repair(repairTarget) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(repairTarget, { visualizePathStyle: { stroke: '#ffffff' } });
+
+                if (target) {
+                    creep.memory.repairTargetId = target.id;
+                }
+            }
+
+            if (target) {
+                if (creep.repair(target) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(target, { visualizePathStyle: { stroke: '#ffffff' } });
                 }
             } else {
                 // No structures to repair, move to idle location
-                creep.moveTo(Game.flags['IdleFlag'], { visualizePathStyle: { stroke: '#ffffff' } });
+                delete creep.memory.repairTargetId;
+                var idleFlag = Game.flags['IdleFlag'];
+                if (idleFlag) {
+                    creep.moveTo(idleFlag, { visualizePathStyle: { stroke: '#ffffff' } });
+                }
             }
         } else {
+            // Harvest energy from storage or source
             var storage = creep.room.storage;
             if (storage && storage.store[RESOURCE_ENERGY] > 0) {
                 if (creep.withdraw(storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
