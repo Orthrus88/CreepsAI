@@ -9,6 +9,7 @@ var roleRepairer = require('role.repairer');
 var roleRangedAttacker = require('role.rangedAttacker');
 var roleTower = require('role.tower');
 var helper = require('helper');
+var roleHydrogenHarvester = require('role.hydrogenHarvester');
 
 const bodyHarvester = [WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE];
 const bodyRemoteHarvester = [WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE];
@@ -19,6 +20,7 @@ const bodyDefender = [TOUGH, TOUGH, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK,
 const bodyRepairer = [WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
 const bodyExplorer = [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, TOUGH, TOUGH];
 const bodyRangedAttacker = [TOUGH, TOUGH, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK, MOVE, MOVE, MOVE];
+const bodyHydrogenHarvester = [WORK, WORK, CARRY, CARRY, MOVE, MOVE];
 
 const targetRoom = 'W38N45';
 const homeRoom = 'W38N44';
@@ -42,17 +44,19 @@ module.exports.loop = function () {
     var defenders = _.filter(Game.creeps, (creep) => creep.memory.role == 'defender');
     var repairers = _.filter(Game.creeps, (creep) => creep.memory.role == 'repairer');
     var rangedAttackers = _.filter(Game.creeps, (creep) => creep.memory.role == 'rangedAttacker');
+    var hydrogenHarvester = _.filter(Game.creeps, (creep) => creep.memory.role == 'hydrogenHarvester')
 
     // Set max creep numbers
     const maxExplorers = 0;
     const maxHarvesters = 3;
     const maxRemoteHarvesters = 4;
-    const maxRemoteHarvestersW37N45 = 6;
+    const maxRemoteHarvestersW37N45 = 0;
     const maxUpgraders = 4;
     const maxBuilders = 2;
     const maxDefenders = 2;
     const maxRepairers = 2;
     const maxRangedAttackers = 2;
+    const maxHydrogenHarvesters = 1;
 
     // Prioritize spawning logic
     if (harvesters.length < maxHarvesters) {
@@ -67,6 +71,10 @@ module.exports.loop = function () {
         var newName = 'RemoteHarvesterW37N45' + Game.time;
         Game.spawns['Spawn1'].spawnCreep(bodyRemoteHarvesterW37N45, newName,
             { memory: { role: 'remoteHarvesterW37N45', home: 'W38N44', target: 'W37N45' } });
+    } else if (hydrogenHarvester.length < maxHydrogenHarvesters) {
+        var newName = 'HydrogenHarvester' + Game.time;
+        Game.spawns['Spawn1'].spawnCreep(bodyHydrogenHarvester, newName,
+            { memory: { role: 'hydrogenHarvester' } });
     } else if (upgraders.length < maxUpgraders) {
         var newName = 'Upgrader' + Game.time;
         Game.spawns['Spawn1'].spawnCreep(bodyUpgrader, newName,
